@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 8
+names: ['Holes', 'Tails out', 'broken pick', 'omitted pick', 'others', 'slubs', 'strains', 'streaks or shading']
+
+roboflow:
+  workspace: project-zkzkn
+  project: annotation-kgjqq
+  version: 4
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/project-zkzkn/annotation-kgjqq/dataset/4
