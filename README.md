@@ -148,3 +148,10 @@ Ultralytics YOLOv8 Documentation
 Redmon et al. “You Only Look Once”
 
 
+| Parameter  | Value   |
+| ---------- | ------- |
+| Batch Size | 8       |
+| Image Size | 640     |
+| Workers    | 2       |
+| Optimizer  | AdamW   |
+| Device     | GPU (0) |
