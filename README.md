@@ -177,6 +177,12 @@ runs/detect/train/
 │── F1_curve.png
 │── labels_correlogram.png
 ```
+#  Sample Output
+Here are some detected fabric defects using the trained model:
+
+![Prediction Example](D:\manual annoated\runs\detect\train\val_batch0_pred.jpg)
+![Prediction Example](images/sample_output2.jpg)
+
 # Performance Metrics
 
 Typical scores for a good dataset:
