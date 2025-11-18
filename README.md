@@ -180,8 +180,8 @@ runs/detect/train/
 #  Sample Output
 Here are some detected fabric defects using the trained model:
 
-![Prediction Example](D:\manual annoated\runs\detect\train\val_batch0_pred.jpg)
-![Prediction Example](images/sample_output2.jpg)
+![Prediction Example](Sample_Output/val_batch1_labels.jpg)
+![Prediction Example](Sample_Output/val_batch1_labels.jpg)
 
 # Performance Metrics
 
