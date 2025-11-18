@@ -1,150 +1,143 @@
-# Fabric Defect Detection App (React Native + Django + YOLOv8)
+#Fabric Defect Detection Using YOLOv8
 
-This project is a full-stack mobile application for detecting fabric defects using a trained YOLOv8 model.  
-Users upload a fabric image through the mobile app, the Django backend processes it, and the API returns an annotated image showing detected defects.
+A professional AI-based system to detect defects in fabric images using the YOLOv8 deep learning model. This project includes a complete training pipeline, prediction script, dataset configuration, and optimizations for low-VRAM GPUs like the RTX 3050.
 
-------------------------------------------------------------
-1. FEATURES
-------------------------------------------------------------
+# Features
 
-Frontend (React Native)
-- Upload fabric image from gallery or camera
-- Sends image to backend for detection
-- Displays annotated output image
-- Simple and user-friendly UI
+YOLOv8-L model for high-accuracy defect detection
 
-Backend (Django REST API)
-- YOLOv8 inference for fabric defects
-- Accepts image via POST request
-- Returns JSON with defect data and annotated image URL
-- Saves uploaded and output images
+Supports custom annotated datasets
 
-YOLOv8 Model
-- Trained on custom fabric defect dataset
-- Detects defects such as:
-  hole, stain, scratch, yarn_defect, color_variation
+VRAM-optimized training (safe for 4GB GPUs)
 
-------------------------------------------------------------
-2. PROJECT STRUCTURE
-------------------------------------------------------------
+Advanced augmentations for improved generalization
 
-fabric-defect-detection/
+Modular training and prediction scripts
+
+Ready for integration into Django/React Native applications
+
+📁 Project Structure
+Fabric-Defect-Detection/
 │
-├── backend/          (Django + YOLOv8)
-│   ├── detect/
-│   ├── model/best.pt
-│   ├── manage.py
-│   └── requirements.txt
+├── train.py
+├── predict.py
+├── README.md
 │
-└── mobile/           (React Native)
-    ├── App.js
-    ├── screens/
-    ├── components/
-    └── package.json
+└── data/
+    ├── data.yaml
+    ├── images/
+    │   ├── train/
+    │   └── val/
+    └── labels/
+        ├── train/
+        └── val/
 
-------------------------------------------------------------
-3. BACKEND SETUP (DJANGO + YOLOv8)
-------------------------------------------------------------
+🧠 Workflow
+Dataset → Annotation → YOLO-format data → Training → Evaluation → Prediction
 
-Install dependencies:
-    cd backend
-    pip install -r requirements.txt
+📦 Installation
+pip install ultralytics torch scipy
 
-Start server:
-    python manage.py runserver
+🗂️ Dataset YAML (data.yaml)
+path: D:/manual annoated
+train: images/train
+val: images/val
 
-Backend API endpoint:
-    POST http://localhost:8000/api/detect/
+names:
+  0: defect
 
-Expected API response:
-{
-  "status": "success",
-  "defects": [
-    {"label": "hole", "confidence": 0.91},
-    {"label": "stain", "confidence": 0.83}
-  ],
-  "annotated_image_url": "http://localhost:8000/media/output/annotated.jpg"
-}
+🏋️ Training Script (train.py)
+from ultralytics import YOLO
+import torch, gc
 
-------------------------------------------------------------
-4. FRONTEND SETUP (REACT NATIVE)
-------------------------------------------------------------
+def clear_vram():
+    gc.collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+        torch.cuda.ipc_collect()
+        print("[INFO] VRAM Cleared Successfully!")
 
-Install dependencies:
-    cd mobile
-    npm install
+def train_yolo():
+    clear_vram()
 
-Start development server:
-    npx expo start
+    model = YOLO("yolov8l.pt")
 
-Update backend URL in code:
-    const API_URL = "http://<your-ip>:8000/api/detect/";
-
-------------------------------------------------------------
-5. YOLOv8 MODEL DETAILS
-------------------------------------------------------------
-
-Training command example:
-    model = YOLO("yolov8m.pt")
     model.train(
-        data="fabric.yaml",
-        epochs=120,
+        data="data/data.yaml",
+        epochs=33,
         imgsz=640,
         batch=8,
+        workers=2,
+        optimizer="AdamW",
+        lr0=0.0005,
+        weight_decay=0.0003,
+        patience=20,
+        mosaic=0.8,
+        mixup=0.1,
+        hsv_h=0.02,
+        hsv_s=0.6,
+        hsv_v=0.3,
+        scale=0.8,
+        fliplr=0.5,
+        cache=True,
         device=0
     )
 
-Trained model is stored at:
-    backend/model/best.pt
+if __name__ == "__main__":
+    train_yolo()
 
-------------------------------------------------------------
-6. API USAGE
-------------------------------------------------------------
+🔍 Prediction Script (predict.py)
+from ultralytics import YOLO
 
-POST /api/detect/
-Form-data:
-  Key: image
-  Type: File
-  Description: Fabric image to check for defects
+def predict(image_path):
+    model = YOLO("runs/detect/train/weights/best.pt")
+    results = model(image_path)
+    results.show()
+    results.save("predictions/")
 
-The API returns:
-- Detected defect names
-- Confidence scores
-- Annotated image URL
-- Bounding box details
+if __name__ == "__main__":
+    predict("test.jpg")
 
-------------------------------------------------------------
-7. REQUIREMENTS
-------------------------------------------------------------
+📊 Output Files (Auto-generated by YOLO)
+runs/detect/train/
+│── weights/
+│     ├── best.pt
+│     └── last.pt
+│── results.png
+│── confusion_matrix.png
+│── PR_curve.png
+│── F1_curve.png
+│── labels_correlogram.png
 
-Backend Requirements:
-- Python 3.x
-- Django
-- Django REST Framework
-- Ultralytics (YOLOv8)
-- OpenCV
-- Pillow
+📈 Performance Metrics
 
-Frontend Requirements:
-- React Native
+Typical scores for a good dataset:
 
-------------------------------------------------------------
-8. DEPLOYMENT
-------------------------------------------------------------
+Metric	Expected Range
+Precision	0.85 – 0.92
+Recall	0.80 – 0.90
+mAP50	0.82 – 0.94
+⚙️ Hardware Optimization (RTX 3050)
+Parameter	Value
+Batch Size	8
+Image Size	640
+Workers	2
+Optimizer	AdamW
+Device	GPU (0)
+🚀 Future Improvements
 
-Backend deployment options:
-- Render
-- Railway
-- AWS EC2
-- DigitalOcean
+Add YOLOv10 for faster inference
 
-Mobile deployment:
-- Expo Build
-- Google Play Store
-- Apple App Store
+Add Grad-CAM heatmap visualization
 
-------------------------------------------------------------
-9. LICENSE
-------------------------------------------------------------
+Build a Django + React Native full app
 
-This project is released under the MIT License.
+Deploy using FastAPI / Streamlit
+
+📚 References
+
+Ultralytics YOLOv8 Documentation
+
+Redmon et al. “You Only Look Once”
+
+Research papers on textile defect detection
