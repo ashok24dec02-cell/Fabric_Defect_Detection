@@ -181,7 +181,7 @@ runs/detect/train/
 Here are some detected fabric defects using the trained model:
 
 ![Prediction Example](Sample_Output/val_batch1_labels.jpg)
-![Prediction Example](Sample_Output/val_batch1_labels.jpg)
+![Prediction Example](Sample_Output/results.png)
 
 # Performance Metrics
 
